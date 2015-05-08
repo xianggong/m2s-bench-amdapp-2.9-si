@@ -1,0 +1,9 @@
+include ../../Makefile.mk
+
+all: EXEC_NAME
+
+EXEC_NAME: EXEC_NAME.cpp EXEC_NAME.hpp
+	$(CXX) $< -m32 $(INC) -o $@ $(LD)
+
+clean:
+	rm -rf EXEC_NAME

@@ -51,7 +51,7 @@ int BinarySearch::setupBinarySearch()
             1);
     }
 
-    status = unmapBuffer( inputBuffer, input);
+    status = unmapBuffer( inputBuffer, input, inputSizeBytes);
     CHECK_ERROR(status, SDK_SUCCESS,
                 "Failed to unmap device buffer.(inputBuffer in setupBinarySearch)");
 
@@ -64,32 +64,39 @@ int BinarySearch::mapBuffer(cl_mem deviceBuffer, T* &hostPointer,
                             size_t sizeInBytes, cl_map_flags flags)
 {
     cl_int status;
-    hostPointer = (T*) clEnqueueMapBuffer(commandQueue,
-                                          deviceBuffer,
-                                          CL_TRUE,
-                                          flags,
-                                          0,
-                                          sizeInBytes,
-                                          0,
-                                          NULL,
-                                          NULL,
-                                          &status);
-    CHECK_OPENCL_ERROR(status, "clEnqueueMapBuffer failed");
+
+    // Workaround for M2S
+    hostPointer = static_cast<T *>(calloc(1, sizeInBytes));
+    status = clEnqueueReadBuffer(commandQueue, 
+                                 deviceBuffer, 
+                                 true, 
+                                 0, 
+                                 sizeInBytes, 
+                                 hostPointer, 
+                                 0, 
+                                 NULL, 
+                                 NULL);
+    CHECK_OPENCL_ERROR(status, "clEnqueueReadBuffer failed");
 
     return SDK_SUCCESS;
 }
 
 int
-BinarySearch::unmapBuffer(cl_mem deviceBuffer, void* hostPointer)
+BinarySearch::unmapBuffer(cl_mem deviceBuffer, void* hostPointer, size_t sizeInBytes)
 {
     cl_int status;
-    status = clEnqueueUnmapMemObject(commandQueue,
-                                     deviceBuffer,
-                                     hostPointer,
-                                     0,
-                                     NULL,
-                                     NULL);
-    CHECK_OPENCL_ERROR(status, "clEnqueueUnmapMemObject failed");
+
+    // Workaround for M2S
+    status = clEnqueueWriteBuffer(commandQueue, 
+                                  deviceBuffer, 
+                                  true, 
+                                  0, 
+                                  sizeInBytes, 
+                                  hostPointer, 
+                                  0, 
+                                  NULL, 
+                                  NULL);
+    CHECK_OPENCL_ERROR(status, "clEnqueueWriteBuffer failed");
 
     return SDK_SUCCESS;
 }
@@ -307,7 +314,7 @@ BinarySearch::runCLKernels(void)
 
     if((input[0] > findMe) || (input[length - 1] < findMe))
     {
-        status = unmapBuffer( inputBuffer, input);
+        status = unmapBuffer( inputBuffer, input, inputSizeBytes);
         CHECK_ERROR(status, SDK_SUCCESS, "Failed to unmap device buffer.(inputBuffer)");
 
         return SDK_SUCCESS;
@@ -316,11 +323,11 @@ BinarySearch::runCLKernels(void)
     CHECK_ERROR(status, SDK_SUCCESS, "Failed to map device buffer.(outputBuffer)");
 
     output[3] = 1;
-    status = unmapBuffer( outputBuffer, output);
+    status = unmapBuffer( outputBuffer, output, sizeof(cl_uint4));
     CHECK_ERROR(status, SDK_SUCCESS,
                 "Failed to unmap device buffer.(outputBuffer)");
 
-    status = unmapBuffer( inputBuffer, input);
+    status = unmapBuffer( inputBuffer, input, inputSizeBytes);
     CHECK_ERROR(status, SDK_SUCCESS,
                 "Failed to unmap device buffer.(inputBuffer in setupBinarySearch)");
 
@@ -387,7 +394,7 @@ BinarySearch::runCLKernels(void)
         CHECK_OPENCL_ERROR(status, "clSetKernelArg 4(findMe) failed.");
         output[3] = 0;
 
-        status = unmapBuffer( outputBuffer, output );
+        status = unmapBuffer( outputBuffer, output, sizeof(cl_int4));
         CHECK_ERROR(status, SDK_SUCCESS,
                     "Failed to unmap device buffer.(outputBuffer)");
 
@@ -435,10 +442,10 @@ BinarySearch::runCLKernels(void)
         }
     }
 
-    status = unmapBuffer( inputBuffer, input);
+    status = unmapBuffer( inputBuffer, input, inputSizeBytes);
     CHECK_ERROR(status, SDK_SUCCESS, "Failed to unmap device buffer.(inputBuffer)");
 
-    status = unmapBuffer( outputBuffer, output );
+    status = unmapBuffer( outputBuffer, output, sizeof(cl_uint4));
     CHECK_ERROR(status, SDK_SUCCESS,
                 "Failed to unmap device buffer.(outputBuffer)");
 
@@ -647,7 +654,7 @@ int BinarySearch::verifyResults()
 
         memcpy(verificationInput, input, length*sizeof(cl_int));
 
-        status = unmapBuffer( inputBuffer, input );
+        status = unmapBuffer( inputBuffer, input, length * sizeof(cl_int));
         CHECK_ERROR(status, SDK_SUCCESS,
                     "Failed to unmap device buffer.(inputBuffer in sampleArgs->verify)");
 

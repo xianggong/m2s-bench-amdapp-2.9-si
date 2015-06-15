@@ -120,7 +120,8 @@ class BinarySearch
          * clEnqueueUnmapMemObject
          * @return SDK_SUCCESS on success and SDK_FAILURE on failure
          */
-        int unmapBuffer(cl_mem deviceBuffer, void* hostPointer);
+        int unmapBuffer(cl_mem deviceBuffer, void* hostPointer, 
+                        size_t sizeInBytes);
 
         /**
          * Override from SDKSample, Generate binary image of given kernel

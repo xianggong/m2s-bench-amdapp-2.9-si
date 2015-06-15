@@ -96,7 +96,8 @@ class BitonicSort
         int mapBuffer(cl_mem deviceBuffer, T* &hostPointer, size_t sizeInBytes,
                       cl_map_flags flags=CL_MAP_READ);
 
-        int unmapBuffer(cl_mem deviceBuffer, void* hostPointer);
+        int unmapBuffer(cl_mem deviceBuffer, void* hostPointer, 
+                        size_t sizeInBytes);
 
         /**
          * Override from SDKSample, Generate binary image of given kernel

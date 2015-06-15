@@ -53,7 +53,7 @@ int BitonicSort::setupBitonicSort()
             1);
     }
 
-    status = unmapBuffer( inputBuffer, input);
+    status = unmapBuffer( inputBuffer, input, inputSizeBytes);
     CHECK_ERROR(status, SDK_SUCCESS, "Failed to unmap device buffer.(inputBuffer)");
 
     return SDK_SUCCESS;
@@ -65,32 +65,40 @@ int BitonicSort::mapBuffer(cl_mem deviceBuffer, T* &hostPointer,
                            size_t sizeInBytes, cl_map_flags flags)
 {
     cl_int status;
-    hostPointer = (T*) clEnqueueMapBuffer(commandQueue,
-                                          deviceBuffer,
-                                          CL_TRUE,
-                                          flags,
-                                          0,
-                                          sizeInBytes,
-                                          0,
-                                          NULL,
-                                          NULL,
-                                          &status);
-    CHECK_OPENCL_ERROR(status, "clEnqueueMapBuffer failed");
+
+    // Workaround for M2S
+    hostPointer = static_cast<T *>(calloc(1, sizeInBytes));
+    status = clEnqueueReadBuffer(commandQueue, 
+                                 deviceBuffer, 
+                                 true, 
+                                 0, 
+                                 sizeInBytes, 
+                                 hostPointer, 
+                                 0, 
+                                 NULL, 
+                                 NULL);
+    CHECK_OPENCL_ERROR(status, "clEnqueueReadBuffer failed");
 
     return SDK_SUCCESS;
 }
 
 int
-BitonicSort::unmapBuffer(cl_mem deviceBuffer, void* hostPointer)
+BitonicSort::unmapBuffer(cl_mem deviceBuffer, void* hostPointer, 
+                         size_t sizeInBytes)
 {
     cl_int status;
-    status = clEnqueueUnmapMemObject(commandQueue,
-                                     deviceBuffer,
-                                     hostPointer,
-                                     0,
-                                     NULL,
-                                     NULL);
-    CHECK_OPENCL_ERROR(status, "clEnqueueUnmapMemObject failed");
+
+    // Workaround for M2S
+    status = clEnqueueWriteBuffer(commandQueue, 
+                                  deviceBuffer, 
+                                  true, 
+                                  0, 
+                                  sizeInBytes, 
+                                  hostPointer, 
+                                  0, 
+                                  NULL, 
+                                  NULL);
+    CHECK_OPENCL_ERROR(status, "clEnqueueWriteBuffer failed");
 
     return SDK_SUCCESS;
 }
@@ -540,13 +548,13 @@ int BitonicSort::run()
 
     if(!sampleArgs->quiet)
     {
-        int status = mapBuffer( inputBuffer, input, length, CL_MAP_READ);
+        int status = mapBuffer( inputBuffer, input, length * sizeof(cl_int), CL_MAP_READ);
         CHECK_ERROR(status, SDK_SUCCESS,
                     "Failed to map device buffer.(inputBuffer in run())");
 
         printArray<cl_uint>("Output", input, length, 1);
 
-        status = unmapBuffer( inputBuffer, input);
+        status = unmapBuffer( inputBuffer, input, length * sizeof(cl_int));
         CHECK_ERROR(status, SDK_SUCCESS,
                     "Failed to unmap device buffer.(inputBuffer in run())");
     }
@@ -585,7 +593,7 @@ int BitonicSort::verifyResults()
             std::cout<<"Failed\n" << std::endl;
             return SDK_FAILURE;
         }
-        status = unmapBuffer( inputBuffer, input );
+        status = unmapBuffer( inputBuffer, input, length * sizeof(cl_int));
         CHECK_ERROR(status, SDK_SUCCESS,
                     "Failed to unmap device buffer.(inputBuffer in verifyResults())");
 

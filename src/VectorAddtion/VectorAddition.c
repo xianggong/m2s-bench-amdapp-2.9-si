@@ -18,7 +18,7 @@ const char *kernelSource =                                      "\n" \
 int main( int argc, char* argv[] )
 {
     // Length of vectors
-    unsigned int n = 100000;
+    unsigned int n = 1024;
  
     // Host input vectors
     float *h_a;
@@ -84,7 +84,7 @@ int main( int argc, char* argv[] )
     clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
  
     // Create the compute kernel in the program we wish to run
-    kernel = clCreateKernel(program, "vecAdd", &err);
+    kernel = clCreateKernel(program, "vectorAdd", &err);
  
     // Create the input and output arrays in device memory for our calculation
     d_a = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
@@ -98,9 +98,9 @@ int main( int argc, char* argv[] )
                                    bytes, h_b, 0, NULL, NULL);
  
     // Set the arguments to our compute kernel
-    err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
+    err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_c);
     err |= clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_b);
-    err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_c);
+    err |= clSetKernelArg(kernel, 2, sizeof(cl_mem), &d_a);
  
     // Execute the kernel over the entire range of the data set  
     err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize,

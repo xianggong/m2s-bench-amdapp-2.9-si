@@ -2,8 +2,14 @@ include ../../Makefile.mk
 
 all: EXEC_NAME
 
-EXEC_NAME: EXEC_NAME.cpp EXEC_NAME.hpp
-	$(CXX) $< -m32 $(INC) -o $@ $(LD)
+EXEC_NAME: *.cpp *.hpp
+	$(CXX) $? -m32 $(INC) -o $@ $(LD)
+
+run:
+	M2S_OPENCL_BINARY=$(PWD)/EXEC_NAME_Kernels.bin $(M2S_BIN) --si-sim functional ./EXEC_NAME -q -e 
+
+optrun:
+	M2S_OPENCL_BINARY=$(PWD)/EXEC_NAME_Kernels.opt.bin $(M2S_BIN) --si-sim functional ./EXEC_NAME -q -e 
 
 clean:
 	rm -rf EXEC_NAME

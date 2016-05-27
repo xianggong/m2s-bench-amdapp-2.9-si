@@ -47,6 +47,11 @@ CFLAGS = "-I../include -I../include/SDKUtil -I. -I$(M2S_INCLUDE) -g"
 LDFLAGS_STATIC = "-L$(M2S_LIB) -lm2s-opencl -lpthread -ldl -lrt -static -m32"
 LDFLAGS_DYNAMIC = "-L$(M2S_LIB) -lm2s-opencl -lpthread -ldl -lrt -m32"
 
+ini:
+	for subdir in $(SUBDIRS); do \
+		make -C $$subdir ini || exit 1; \
+	done	
+
 clean:
 	for subdir in $(SUBDIRS); do \
 		make -C $$subdir clean || exit 1; \

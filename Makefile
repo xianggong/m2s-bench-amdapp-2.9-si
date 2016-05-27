@@ -44,8 +44,8 @@ M2S_BIN = $(M2S_ROOT)/bin
 M2S_INCLUDE = $(M2S_ROOT)/runtime/include
 
 CFLAGS = "-I../include -I../include/SDKUtil -I. -I$(M2S_INCLUDE) -g"
-LDFLAGS_STATIC = "-L$(M2S_LIB) -lm2s-opencl -lpthread -ldl -lrt -static -m32"
-LDFLAGS_DYNAMIC = "-L$(M2S_LIB) -lm2s-opencl -lpthread -ldl -lrt -m32"
+LDFLAGS_STATIC = "-m32 -L$(M2S_LIB) -lm -lrt -pthread -l:libm2s-opencl.a -ldl"
+LDFLAGS_DYNAMIC = "-m32 -L$(M2S_LIB) -lm2s-opencl -lpthread -ldl -lrt"
 
 ini:
 	for subdir in $(SUBDIRS); do \

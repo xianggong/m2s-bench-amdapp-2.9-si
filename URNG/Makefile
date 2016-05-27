@@ -7,6 +7,8 @@ PROGRAM_BINARY_DYNAMIC = $(BENCHMARK_NAME)_dynamic
 PROGRAM_BINARY_STATIC = $(BENCHMARK_NAME)_static
 KERNEL_SOURCES = $(BENCHMARK_NAME)_Kernels.cl
 
+CURR_PATH=$(PWD)/URNG
+
 all: $(PROGRAM_BINARY_STATIC) $(PROGRAM_BINARY_DYNAMIC)
 
 clean:
@@ -19,7 +21,7 @@ $(PROGRAM_BINARY_DYNAMIC): *.cpp $(M2S_LIBOPENCL)
 	$(CXX) $(CFLAGS) *.cpp -o $(PROGRAM_BINARY_DYNAMIC) $(LDFLAGS_DYNAMIC)
 
 ini:    
-	if [ -a $(BENCHMARK_NAME)_Kernels.bin ]; then echo '$(PWD)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels.bin -q -e' > benchmark.ini; fi;
-	if [ -a $(BENCHMARK_NAME)_Kernels_sched.bin ]; then echo '$(PWD)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels_sched.bin -q -e' >>benchmark.ini; fi;
-	if [ -a $(BENCHMARK_NAME)_Kernels_fusion.bin ]; then echo '$(PWD)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels_fusion.bin -q -e' >>benchmark.ini; fi;
+	if [ -a $(BENCHMARK_NAME)_Kernels.bin ]; then echo '$(CURR_PATH)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels.bin -q -e' > benchmark.ini; fi;
+	if [ -a $(BENCHMARK_NAME)_Kernels_sched.bin ]; then echo '$(CURR_PATH)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels_sched.bin -q -e' >>benchmark.ini; fi;
+	if [ -a $(BENCHMARK_NAME)_Kernels_fusion.bin ]; then echo '$(CURR_PATH)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels_fusion.bin -q -e' >>benchmark.ini; fi;
 

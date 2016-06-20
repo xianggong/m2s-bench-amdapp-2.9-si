@@ -8,6 +8,7 @@ BENCHMARKS_ROOT = ..
 PROGRAM_BINARY_DYNAMIC = $(BENCHMARK_NAME)_dynamic
 PROGRAM_BINARY_STATIC = $(BENCHMARK_NAME)_static
 KERNEL_SOURCES = $(BENCHMARK_NAME)_Kernels.cl
+KERNEL_BINARYS = $(wildcard *.bin)
 
 all: $(PROGRAM_BINARY_STATIC) $(PROGRAM_BINARY_DYNAMIC)
 
@@ -22,7 +23,10 @@ $(PROGRAM_BINARY_DYNAMIC): *.cpp $(M2S_LIBOPENCL)
 
 ini:    
 	rm -f benchmark.ini
-	if [ -a $(BENCHMARK_NAME)_Kernels.bin ] && [ -n "$(SIZE)" ]; then echo '$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels.bin -q -e -x $(SIZE)' > benchmark.ini; fi;
-	if [ -a $(BENCHMARK_NAME)_Kernels.bin ] && [ -n "$(SIZE)" ]; then echo '$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels_sched.bin -q -e -x $(SIZE)' > benchmark.ini; fi;
-	if [ -a $(BENCHMARK_NAME)_Kernels.bin ] && [ -n "$(SIZE)" ]; then echo '$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $(BENCHMARK_NAME)_Kernels_fusion.bin -q -e -x $(SIZE)' > benchmark.ini; fi;
-
+	if [ -n "$(SIZE)" ]; then \
+		for binary in $(KERNEL_BINARYS); do \
+			echo "$$binary"; \
+			echo "$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $$binary -q -e -x $(SIZE)" >> benchmark.ini; \
+		done; \
+	fi;\
+	

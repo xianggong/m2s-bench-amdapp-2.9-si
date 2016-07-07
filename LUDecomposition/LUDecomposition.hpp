@@ -46,10 +46,10 @@ class LUD
         effectiveDimension;      /**< effectiveDimension(square matrix) of the input matrix */
         cl_int
         actualDimension;      /**< actual dimension (might not be in 2^n form) of input matrix */
-        cl_double              *input;      /**< Input array */
-        cl_double
+        cl_float              *input;      /**< Input array */
+        cl_float
         *matrixCPU;      /**< Inplace Array for CPU for reference implementation */
-        cl_double          *matrixGPU;      /**< Inplace Array for GPU */
+        cl_float          *matrixGPU;      /**< Inplace Array for GPU */
         cl_int              blockSize;       /**< actual dimension / vector size */
         cl_context            context;      /**< CL context */
         cl_device_id         *devices;      /**< CL device list */
@@ -134,7 +134,7 @@ class LUD
          * @param height height of the array
          */
         void LUDCPUReference(
-            double *matrixCPU,
+            float *matrixCPU,
             const cl_uint effectiveDimension);
 
         /**

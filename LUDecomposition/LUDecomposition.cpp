@@ -17,7 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include "LUDecomposition.hpp"
 #define VECTOR_SIZE 4
-#define SIZE effectiveDimension * effectiveDimension * sizeof(double)
+#define SIZE effectiveDimension * effectiveDimension * sizeof(float)
 
 int LUD::setupLUD()
 {
@@ -40,14 +40,14 @@ int LUD::setupLUD()
     blockSize = effectiveDimension / VECTOR_SIZE;
 
 #ifdef _WIN32
-    input = static_cast<double*>(_aligned_malloc(SIZE, 4096));
+    input = static_cast<float*>(_aligned_malloc(SIZE, 4096));
 #else
-    input = static_cast<double*>(memalign(4096, SIZE));
+    input = static_cast<float*>(memalign(4096, SIZE));
 #endif
     CHECK_ALLOCATION(input, "Unable to allocate input memory");
 
-    //initialize with random double type elements
-    fillRandom<double>(
+    //initialize with random float type elements
+    fillRandom<float>(
         input,
         effectiveDimension,
         effectiveDimension,
@@ -56,15 +56,15 @@ int LUD::setupLUD()
         1);
 
 #ifdef _WIN32
-    matrixGPU = static_cast<double*>(_aligned_malloc(SIZE, 4096));
+    matrixGPU = static_cast<float*>(_aligned_malloc(SIZE, 4096));
 #else
-    matrixGPU = static_cast<double*>(memalign(4096, SIZE));
+    matrixGPU = static_cast<float*>(memalign(4096, SIZE));
 #endif
     CHECK_ALLOCATION(matrixGPU, "Unable to allocate memory for GPU input");
 
     if(sampleArgs->verify)
     {
-        matrixCPU = static_cast<double*>(malloc(SIZE));
+        matrixCPU = static_cast<float*>(malloc(SIZE));
         CHECK_ALLOCATION(matrixCPU,
                          "Unable to allocate memory for refernce implementation");
         memcpy((void*)matrixCPU, (const void*)input, SIZE);
@@ -72,7 +72,7 @@ int LUD::setupLUD()
 
     if(!sampleArgs->quiet)
     {
-        printArray<double>(
+        printArray<float>(
             "Input Matrix",
             input,
             actualDimension,
@@ -185,7 +185,7 @@ int LUD::setupCL(void)
 
     //Local Memory Required in worst case
     localMemoryNeeded = (cl_ulong)((deviceInfo.maxWorkGroupSize / 2) * sizeof(
-                                       cl_double));
+                                       cl_float));
 
     status = setupLUD();
     if(status != SDK_SUCCESS)
@@ -197,7 +197,7 @@ int LUD::setupCL(void)
     inplaceBuffer = clCreateBuffer(
                         context,
                         CL_MEM_READ_WRITE,
-                        sizeof(double) * effectiveDimension * effectiveDimension,
+                        sizeof(float) * effectiveDimension * effectiveDimension,
                         NULL,
                         &status);
     CHECK_OPENCL_ERROR(status, "clCreateBuffer failed. (inputBuffer)");
@@ -205,7 +205,7 @@ int LUD::setupCL(void)
     inputBuffer2 = clCreateBuffer(
                        context,
                        CL_MEM_READ_WRITE,
-                       sizeof(double) * effectiveDimension * effectiveDimension,
+                       sizeof(float) * effectiveDimension * effectiveDimension,
                        NULL,
                        &status);
     CHECK_OPENCL_ERROR(status, "clCreateBuffer failed. (outputBuffer)");
@@ -391,7 +391,7 @@ int LUD::runCLKernels(void)
         status = clSetKernelArg(
                      kernelLUD,
                      3,
-                     sizeof(cl_double) * localThreads[1],
+                     sizeof(cl_float) * localThreads[1],
                      NULL);
         CHECK_OPENCL_ERROR(status, "clSetKernelArg failed. :kernelLUD(localBuffer)");
 
@@ -503,13 +503,13 @@ int LUD::runCLKernels(void)
     return SDK_SUCCESS;
 }
 
-void LUD::LUDCPUReference(double* matrixCPU, const cl_uint effectiveDimension)
+void LUD::LUDCPUReference(float* matrixCPU, const cl_uint effectiveDimension)
 {
     for(unsigned int d = 0 ; d < effectiveDimension-1 ; d++)
     {
         for(unsigned i = d + 1 ; i < effectiveDimension; i++)
         {
-            double ratio = matrixCPU[i * effectiveDimension + d]
+            float ratio = matrixCPU[i * effectiveDimension + d]
                            / matrixCPU[d * effectiveDimension + d];
             for(unsigned int j = d; j < effectiveDimension; j++)
             {
@@ -613,7 +613,7 @@ int LUD::run()
     totalKernelTime = (double)(sampleTimer->readTimer(timer)) / iterations;
 
     if(!sampleArgs->quiet)
-        printArray<double>(
+        printArray<float>(
             "LU Matrix GPU implementation",
             matrixGPU,
             actualDimension,
@@ -635,7 +635,7 @@ int LUD::verifyResults()
         referenceKernelTime = sampleTimer->readTimer(refTimer);
 
         if(!sampleArgs->quiet)
-            printArray<double>(
+            printArray<float>(
                 "LU Matrix CPU Reference",
                 matrixCPU,
                 actualDimension,

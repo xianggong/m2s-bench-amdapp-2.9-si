@@ -21,12 +21,15 @@ $(PROGRAM_BINARY_STATIC): *.cpp $(M2S_LIBOPENCL)
 $(PROGRAM_BINARY_DYNAMIC): *.cpp $(M2S_LIBOPENCL)
 	$(CXX) $(CFLAGS) *.cpp -o $(PROGRAM_BINARY_DYNAMIC) $(LDFLAGS_DYNAMIC)
 
-ini:    
+ini:
 	rm -f benchmark.ini
-	if [ -n "$(SIZE)" ]; then \
-		for binary in $(KERNEL_BINARYS); do \
-			echo "$$binary"; \
-			echo "$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $$binary -q -e -x $(SIZE)" >> benchmark.ini; \
-		done; \
-	fi;\
-	
+	if [ -n "$(MIN_SIZE)" ] && [ -n "$(MAX_SIZE)" ] ; then \
+                size=$(MIN_SIZE);\
+                while [ "$$size" -lt "$(MAX_SIZE)" ]; do \
+                        for binary in $(KERNEL_BINARYS); do \
+                                echo "$$size    $$binary"; \
+                                echo "$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $$binary -q -e -x $$size" >> benchmark.ini; \
+                        done; \
+                        ((size = size * 2));\
+                done; \
+        fi;\

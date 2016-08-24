@@ -1,17 +1,27 @@
 /**********************************************************************
 Copyright ©2014 Advanced Micro Devices, Inc. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-•   Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-•   Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or
+•   Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+•   Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation and/or
  other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
- DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
 #ifndef MULTI_DEVICE_H_
 #define MULTI_DEVICE_H_
@@ -33,95 +43,88 @@ using namespace appsdk;
 
 #define SAMPLE_VERSION "AMD-APP-SDK-v2.9-1.599.2"
 
-class Device
-{
-    public:
+class Device {
+ public:
+  // CL Objects and memory buffers
+  int status;
+  cl_device_type dType;  // device type
+  cl_device_id deviceId;  // device ID
+  cl_context context;  // context
+  cl_command_queue queue;  // command-queue
+  cl_mem inputBuffer;  // input buffer
+  cl_mem outputBuffer;  // output buffer
+  cl_program program;  // program object
+  cl_kernel kernel;  // kernel object
+  cl_event eventObject;  // event object
+  cl_ulong kernelStartTime;  // kernel start time
+  cl_ulong kernelEndTime;  // kernel end time
+  double elapsedTime;  // elapsed time in ms
+  cl_float *output;  // output host buffer for verification
 
-        //CL Objects and memory buffers
-        int status;
-        cl_device_type dType;       //device type
-        cl_device_id deviceId;      //device ID
-        cl_context context;         //context
-        cl_command_queue queue;     //command-queue
-        cl_mem inputBuffer;         //input buffer
-        cl_mem outputBuffer;        //output buffer
-        cl_program program;         //program object
-        cl_kernel kernel;           //kernel object
-        cl_event eventObject;       //event object
-        cl_ulong kernelStartTime;   //kernel start time
-        cl_ulong kernelEndTime;     //kernel end time
-        double elapsedTime;         //elapsed time in ms
-        cl_float *output;           //output host buffer for verification
+  Device() { output = NULL; }
 
-        Device()
-        {
-            output = NULL;
-        }
+  ~Device();
 
-        ~Device();
+  // Create Context
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int createContext();
 
-        // Create Context
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int createContext();
+  // Create Command-queue
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int createQueue();
 
-        // Create Command-queue
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int createQueue();
+  // Create input and output buffers and Enqueue write data
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int createBuffers();
 
-        // Create input and output buffers and Enqueue write data
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int createBuffers();
+  // Initialize Input buffers
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int enqueueWriteBuffer();
 
-        // Initialize Input buffers
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int enqueueWriteBuffer();
+  // Create Program object
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int createProgram(const char **source, const size_t *sourceSize);
 
-        // Create Program object
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int createProgram(const char **source, const size_t *sourceSize);
+  // Build Program source
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int buildProgram();
 
-        // Build Program source
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int buildProgram();
+  // Create Kernel object
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int createKernel();
 
-        // Create Kernel object
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int createKernel();
+  // Set Kernel arguments
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int setKernelArgs();
 
-        // Set Kernel arguments
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int setKernelArgs();
+  // Enqueue NDRAnge kernel
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int enqueueKernel(size_t *globalThreads, size_t *localThreads);
 
-        // Enqueue NDRAnge kernel
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int enqueueKernel(size_t *globalThreads, size_t *localThreads);
+  // Wait for kernel execution to finish
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int waitForKernel();
 
-        // Wait for kernel execution to finish
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int waitForKernel();
+  // Get kernel execution time
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int getProfilingData();
 
-        // Get kernel execution time
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int getProfilingData();
+  // Get output data from device
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int enqueueReadData();
 
-        // Get output data from device
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int enqueueReadData();
+  // Verify results against host computation
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int verifyResults();
 
-        // Verify results against host computation
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int verifyResults();
-
-        // Cleanup allocated resources
-        // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
-        int cleanupResources();
-
+  // Cleanup allocated resources
+  // @ return SDK_SUCCESS on success and SDK_FAILURE on failure
+  int cleanupResources();
 };
-
 
 /*** GLOBALS ***/
 
-//Separator
+// Separator
 std::string sep = "----------------------------------------------------------";
 bool verify = false;
 
@@ -148,10 +151,10 @@ std::string sourceStr;
 const char *source;
 
 // SDKTimer object
-SDKTimer    sampleTimer;
+SDKTimer sampleTimer;
 
 // Context properties
-const cl_context_properties* cprops;
+const cl_context_properties *cprops;
 cl_context_properties cps[3];
 cl_platform_id platform = NULL;
 
@@ -162,7 +165,7 @@ cl_uint requiredCount = 0;
 /*** FUNCTION DECLARATIONS ***/
 
 // Read a file into a string
-std::string convertToString(const char * filename);
+std::string convertToString(const char *filename);
 
 // Host kernel computation
 
@@ -172,7 +175,8 @@ int CPUkernel();
 
 int runMultiGPU();
 
-// Runs the kernel on a CPU and a GPU and verifies their results with host output
+// Runs the kernel on a CPU and a GPU and verifies their results with host
+// output
 
 int runMultiDevice();
 
@@ -189,9 +193,7 @@ void cleanupHost(void);
  *
  * Prints Array name followed by elements.
  */
-void print1DArray(const std::string arrayName,
-                  const unsigned int *arrayData,
+void print1DArray(const std::string arrayName, const unsigned int *arrayData,
                   const unsigned int length);
 
-
-#endif  /* #ifndef MULTI_DEVICE_H_ */
+#endif /* #ifndef MULTI_DEVICE_H_ */

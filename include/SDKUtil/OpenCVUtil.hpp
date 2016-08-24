@@ -1,19 +1,29 @@
 /**********************************************************************
 Copyright ©2014 Advanced Micro Devices, Inc. All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-1	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-2	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or
+1	Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+2	Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or
  other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
- DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS
+ OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ********************************************************************/
-
 
 #ifndef OPENCV_UTIL_H_
 #define OPENCV_UTIL_H_
@@ -25,23 +35,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <opencv2/core/version.hpp>
 #include <opencv2/core/core.hpp>
 
-
 #include "SDKUtil.hpp"
 
-namespace appsdk
-{
+namespace appsdk {
 /******************************************************************************
 * OpenCVCommandArgs                                                        *
 * Class implements various resources required by the test & initializes the   *
 * resources used by tests                                                     *
 ******************************************************************************/
-class OpenCVCommandArgs : public SDKCmdArgsParser
-{
-  bool version;            /**< Cmd Line Option- if version */
+class OpenCVCommandArgs : public SDKCmdArgsParser {
+  bool version; /**< Cmd Line Option- if version */
 
-public:
-
-  int iterations;  /*!<Number of iterations for kernel execution.*/
+ public:
+  int iterations; /*!<Number of iterations for kernel execution.*/
 
   /**
   ***************************************************************************
@@ -57,7 +63,7 @@ public:
            variables
   **************************************************************************/
   OpenCVCommandArgs();
-  
+
   /**
   ***************************************************************************
   * @brief Destructor of OpenCVCommandArgs
@@ -73,14 +79,12 @@ public:
   * @return SDK_SUCCESS on success, SDK_FAILURE otherwise
   **************************************************************************/
   int parseCommandLine(int argc, char **argv);
-  
 };
 
 /******************************************************************************
 * Implementation of OpenCVCommandArgs::initialize()                        *
 ******************************************************************************/
-int OpenCVCommandArgs::initialize()
-{
+int OpenCVCommandArgs::initialize() {
   int defaultOptions = 4;
 
   Option *optionList = new Option[defaultOptions];
@@ -96,7 +100,7 @@ int OpenCVCommandArgs::initialize()
   optionList[1]._sVersion = "e";
   optionList[1]._lVersion = "verify";
   optionList[1]._description =
-                 "Verify results against reference implementation.";
+      "Verify results against reference implementation.";
   optionList[1]._type = CA_NO_ARGUMENT;
   optionList[1]._value = &verify;
 
@@ -114,34 +118,27 @@ int OpenCVCommandArgs::initialize()
 
   _numArgs = defaultOptions;
   _options = optionList;
-              
+
   return SDK_SUCCESS;
 }
 
 /******************************************************************************
 * Implementation of OpenCVCommandArgs::parseCommandLine()                  *
 ******************************************************************************/
-int OpenCVCommandArgs::parseCommandLine(int argc, char**argv)
-{
-    if(!parse(argv,argc))
-    {
-      usage();
-      if(isArgSet("h",true) == true)
-        exit(SDK_SUCCESS);
-      return SDK_FAILURE;
-    }
-    if(isArgSet("h",true) == true)
-    {
-      usage();
-      exit(SDK_SUCCESS);
-    }
-    if(isArgSet("v", true)
-       || isArgSet("version", false))
-    {
-      std::cout << "APP SDK version : " << sampleVerStr.c_str() << std::endl;
-      exit(0);
-    }
-  
+int OpenCVCommandArgs::parseCommandLine(int argc, char **argv) {
+  if (!parse(argv, argc)) {
+    usage();
+    if (isArgSet("h", true) == true) exit(SDK_SUCCESS);
+    return SDK_FAILURE;
+  }
+  if (isArgSet("h", true) == true) {
+    usage();
+    exit(SDK_SUCCESS);
+  }
+  if (isArgSet("v", true) || isArgSet("version", false)) {
+    std::cout << "APP SDK version : " << sampleVerStr.c_str() << std::endl;
+    exit(0);
+  }
 
   return SDK_SUCCESS;
 }
@@ -149,17 +146,14 @@ int OpenCVCommandArgs::parseCommandLine(int argc, char**argv)
 /******************************************************************************
 * Implementation of OpenCVCommandArgs::OpenCVCommandArgs()              *
 ******************************************************************************/
-OpenCVCommandArgs::OpenCVCommandArgs() : SDKCmdArgsParser()
-{
+OpenCVCommandArgs::OpenCVCommandArgs() : SDKCmdArgsParser() {
   iterations = 1;
-  //initialize();
+  // initialize();
 }
 
 /******************************************************************************
 * Implementation of OpenCVCommandArgs::~OpenCVCommandArgs()             *
 ******************************************************************************/
-OpenCVCommandArgs::~OpenCVCommandArgs()
-{
-}
+OpenCVCommandArgs::~OpenCVCommandArgs() {}
 }
 #endif

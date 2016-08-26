@@ -25,10 +25,10 @@ ini:
 	rm -f benchmark.ini
 	if [ -n "$(MIN_SIZE)" ] && [ -n "$(MAX_SIZE)" ] ; then \
                 size=$(MIN_SIZE);\
-                while [ "$$size" -lt "$(MAX_SIZE)" ]; do \
+                while [ "$$size" -le "$(MAX_SIZE)" ]; do \
                         for binary in $(KERNEL_BINARYS); do \
                                 echo "$$size    $$binary"; \
-                                echo "$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $$binary -q -e -x $$size" >> benchmark.ini; \
+                                echo "$(CURDIR)/$(PROGRAM_BINARY_STATIC) --load $$binary -q -x $$size" >> benchmark.ini; \
                         done; \
                         ((size = size * 2));\
                 done; \
